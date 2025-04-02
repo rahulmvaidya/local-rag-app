@@ -8,7 +8,7 @@ from langchain.chains import RetrievalQA
 from langchain.llms import HuggingFacePipeline
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 
-st.title("🧠 Local RAG Chatbot (Mistral + FAISS)")
+st.title("🧠 Lightweight RAG Chatbot (Falcon + FAISS)")
 
 uploaded_file = st.file_uploader("Upload a .txt file", type="txt")
 
@@ -25,12 +25,12 @@ if uploaded_file:
     vectorstore = FAISS.from_documents(chunks, embeddings)
     retriever = vectorstore.as_retriever(search_type="similarity", k=3)
 
-    model_id = "mistralai/Mistral-7B-Instruct-v0.1"
+    model_id = "tiiuae/falcon-rw-1b"
     tokenizer = AutoTokenizer.from_pretrained(model_id)
-    model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto")
+    model = AutoModelForCausalLM.from_pretrained(model_id)
 
-    gen_pipeline = pipeline("text-generation", model=model, tokenizer=tokenizer, max_new_tokens=512)
-    llm = HuggingFacePipeline(pipeline=gen_pipeline)
+    pipe = pipeline("text-generation", model=model, tokenizer=tokenizer, max_new_tokens=256)
+    llm = HuggingFacePipeline(pipeline=pipe)
 
     rag_chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever, chain_type="stuff")
 
